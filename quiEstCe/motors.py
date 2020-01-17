@@ -6,7 +6,7 @@ def zero():
         valEncoder = BP.get_motor_encoder(BP.PORT_A)
         speed = 20
         
-        if valEncoder == 0:
+        if valEncoder == 0.0:
             BP.set_motor_power(BP.PORT_A, 0)
             break
         elif valEncoder > 0:

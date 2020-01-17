@@ -1,3 +1,4 @@
+# Génère une liste de questions
 def createList():
     départ = ""
     homme = "homme"
@@ -15,7 +16,7 @@ def createList():
     grosNez = "gros nez"
     
     
-    liste_questions = [départ, homme, grandeBouche, yeuxBruns, moustache, barbe, chauve, cheveuxNoirs,
+    liste_questions = [homme, grandeBouche, yeuxBruns, moustache, barbe, chauve, cheveuxNoirs,
                        cheveuxBlonds, cheveuxBruns, peauNoir, lunettes, couvreChef, grosNez, départ]
     
     return liste_questions
