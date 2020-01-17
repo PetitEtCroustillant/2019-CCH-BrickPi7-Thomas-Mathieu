@@ -2,7 +2,7 @@ import time
 import brickpi3
 import tts
 import motors
-
+import random
 
 BP = brickpi3.BrickPi3()
 
@@ -89,4 +89,101 @@ def answer():
     except KeyboardInterrupt:
         BP.reset_all()
 
+#
+def robotSelect(passe, réponse = True):
+    try:
+        if passe == 1:
+            questionChoisie = "homme"
+        elif passe == 2:
+            if réponse:
+                # Hommes
+                questionChoisie = "grande bouche"
+                if passe == 3:
+                    if réponse:
+                        questionChoisie = "gros nez"
+                    else:
+                        questionChoisie = "moustache"
+            else:
+                # Tronçonneuse
+                questionChoisie = "cheveux bruns"
+        # 5 passes max pour les femmes
+        # 6 passes maxpour les hommes
+        
+        
+        #tts.say("La question choisie est: " + questionChoisie)
+        print("Je choisi la question : " + questionChoisie)
+        return questionChoisie
+        
+    except KeyboardInterrupt:
+        BP.reset_all()
 
+
+# Le robot compare les charactéristiques du personnage choisi
+# et la question sélectionnée pour répondre à la question,
+def robotAnswer(personnage, question):
+    switcher = {
+        "homme": "sexe",
+        "grande bouche": "grandeBouche",
+        "yeux brun": "yeuxBruns",
+        "moustache": "moustache",
+        "barbe": "barbe",
+        "chauve": "chauve",
+        "cheveux noirs": "cheveux",
+        "cheveux blonds": "cheveux",
+        "cheveux bruns": "cheveux",
+        "peau noir": "peauNoire",
+        "lunettes": "lunettes",
+        "couvre-chef": "couvreChef",
+        "gros nez": "grosNez"
+    }
+    
+    caractéristique = switcher.get(question, "")
+    if not caractéristique == "":
+        valeurPerso = getattr(personnage, caractéristique)
+        if valeurPerso:
+            return True
+        else:
+            return False
+    
+        if type(valeurPerso) == bool:
+            if valeurPerso != réponse:
+                print(personnage.nom + " supprimé")
+                listePersoSupprimés.append(personnage)
+        if type(valeurPerso) == str:
+            if caractéristique == "sexe":
+                réponseSexe = ""
+                if réponse:
+                    réponseSexe = "Homme"
+                else:
+                    réponseSexe = "Femme"
+                    
+                if valeurPerso != réponseSexe:
+                    print(personnage.nom + " supprimé")
+                    listePersoSupprimés.append(personnage)
+                    
+            if caractéristique == "cheveux":
+                réponseCheveux = ""
+                supprimerPerso = False
+                if question == "cheveux noirs":
+                    réponseCheveux = "Noir"
+                    if not réponse:
+                        supprimerPerso = True
+                elif question == "cheveux blonds":
+                    réponseCheveux = "Blond"
+                    if not réponse:
+                        supprimerPerso = True
+                elif question == "cheveux bruns":
+                    réponseCheveux = "Brun"
+                    if not réponse:
+                        supprimerPerso = True
+                else:
+                    réponseCheveux = "Autre"
+                
+                if supprimerPerso:
+                    if valeurPerso == réponseCheveux:
+                        print(personnage.nom + " supprimé")
+                        listePersoSupprimés.append(personnage)
+                else:
+                    if valeurPerso != réponseCheveux:
+                        print(personnage.nom + " supprimé")
+                        listePersoSupprimés.append(personnage)

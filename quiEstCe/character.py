@@ -72,14 +72,11 @@ def createList():
     return liste_personnage
 
 
-
 # Tire un personnage au sort dans une liste passé en paramètre
 # Retourne le personnage tiré
 def getRandom(listePersonnages):
     characterIndex = randrange(len(listePersonnages))
     return listePersonnages[characterIndex]
-
-
 
 
 # Supprime des personnages de la liste
@@ -101,12 +98,55 @@ def eliminate(listePersonnage, question, réponse):
     }
     
     caractéristique = switcher.get(question, "")
+    listePersoSupprimés = []
     if not caractéristique == "":
         for personnage in listePersonnage:
-            
             valeurPerso = getattr(personnage, caractéristique)
-            if valeurPerso == réponse:
-                print(personnage.nom +" supprimé")
-                listePersonnage.remove(personnage)
+            
+            if type(valeurPerso) == bool:
+                if valeurPerso != réponse:
+                    print(personnage.nom + " supprimé")
+                    listePersoSupprimés.append(personnage)
+            if type(valeurPerso) == str:
+                if caractéristique == "sexe":
+                    réponseSexe = ""
+                    if réponse:
+                        réponseSexe = "Homme"
+                    else:
+                        réponseSexe = "Femme"
+                        
+                    if valeurPerso != réponseSexe:
+                        print(personnage.nom + " supprimé")
+                        listePersoSupprimés.append(personnage)
+                        
+                if caractéristique == "cheveux":
+                    réponseCheveux = ""
+                    supprimerPerso = False
+                    if question == "cheveux noirs":
+                        réponseCheveux = "Noir"
+                        if not réponse:
+                            supprimerPerso = True
+                    elif question == "cheveux blonds":
+                        réponseCheveux = "Blond"
+                        if not réponse:
+                            supprimerPerso = True
+                    elif question == "cheveux bruns":
+                        réponseCheveux = "Brun"
+                        if not réponse:
+                            supprimerPerso = True
+                    else:
+                        réponseCheveux = "Autre"
+                    
+                    if supprimerPerso:
+                        if valeurPerso == réponseCheveux:
+                            print(personnage.nom + " supprimé")
+                            listePersoSupprimés.append(personnage)
+                    else:
+                        if valeurPerso != réponseCheveux:
+                            print(personnage.nom + " supprimé")
+                            listePersoSupprimés.append(personnage)
                 
+        for personnage in listePersoSupprimés:
+            listePersonnage.remove(personnage)
     return listePersonnage
+    #return None

@@ -1,4 +1,4 @@
-from espeak import espeak
+#from espeak import espeak
 import os
 
 def say(text):
