@@ -1,31 +1,41 @@
 # Appel des fichiers
-import createCharacterList as CCL
-import createQuestionList as Questions
-import eliminateCharacter as EC
-import getRandomCharacter as GRC
-import ledAnswerQuestion as LAQ
-import buttonAnswerQuestion as BAQ
-import playerSelectQuestion as PSQ
+import character
+import question
+import chariot
 import motors
 import tts
 
-def main():    
+import brickpi3
+BP = brickpi3.BrickPi3()
 
-    #listePerso = CCL.createList()
-
-    #perso = GRC.getCharacter(listePerso)
-    #print(perso)
-
-    #if (BAQ.answerQuestion() == True):
-     #   LAQ.answerQuestion(True)
-    #elif (BAQ.answerQuestion() == False):
-     #   LAQ.answerQuestion(False)
-    #for personnage in liste :
+def main():
+    #motors.stop(BP.PORT_B)
+    #motors.resetEncoder(BP.PORT_B)
+    #chariot.move(8)
+    
+    listePersos = character.createList()
+    persoAléatoire = character.getRandom(listePersos)
+    print(persoAléatoire)
+    #motors.resetEncoder(BP.PORT_A)
+    
+    #for personnage in listePersos :
       #print(personnage)
       #print("\n")
     
-    listeQuestion = Questions.createList()
-    questionChoisie = PSQ.selectQuestion(listeQuestion)
+    
+    listeQuestion = question.createList()
+    questionChoisie = question.select(listeQuestion)
     print(questionChoisie)
+    
+    réponse = question.answer()
+    if réponse:
+        print("Vrai")
+    else:
+        print("Faux")
+        
+    #listePersos = character.eliminate(listePersos, questionChoisie, réponse)
+    for personnage in listePersos :
+        print(personnage)
+        print("\n")
 
 main()
