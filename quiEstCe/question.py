@@ -6,6 +6,7 @@ import random
 
 BP = brickpi3.BrickPi3()
 
+BP.set_sensor_type(BP.PORT_4, BP.SENSOR_TYPE.TOUCH) # Bouton Stop
 BP.set_sensor_type(BP.PORT_2, BP.SENSOR_TYPE.TOUCH) # Bouton Faux
 BP.set_sensor_type(BP.PORT_1, BP.SENSOR_TYPE.TOUCH) # Bouton Vrai
 
@@ -92,19 +93,20 @@ def answer():
 #
 def robotSelect(passe, réponse = True):
     try:
-        if passe == 1:
+        questionChoisie = "Non fonctionnel"
+        if réponse == None:
             questionChoisie = "homme"
-        elif passe == 2:
+        elif passe >= 2:
             if réponse:
                 # Hommes
                 questionChoisie = "grande bouche"
-                if passe == 3:
+                if passe >= 3:
                     if réponse:
                         questionChoisie = "gros nez"
                     else:
                         questionChoisie = "moustache"
             else:
-                # Tronçonneuse
+                # Femmes
                 questionChoisie = "cheveux bruns"
         # 5 passes max pour les femmes
         # 6 passes maxpour les hommes
@@ -140,28 +142,37 @@ def robotAnswer(personnage, question):
     caractéristique = switcher.get(question, "")
     if not caractéristique == "":
         valeurPerso = getattr(personnage, caractéristique)
-        if valeurPerso:
-            return True
-        else:
-            return False
-    
         if type(valeurPerso) == bool:
-            if valeurPerso != réponse:
-                print(personnage.nom + " supprimé")
-                listePersoSupprimés.append(personnage)
-        if type(valeurPerso) == str:
-            if caractéristique == "sexe":
-                réponseSexe = ""
-                if réponse:
-                    réponseSexe = "Homme"
+            if valeurPerso:
+                return True
+            else:
+                return False
+    
+        if caractéristique == "sexe":
+            if valeurPerso == "homme":
+                return True
+            else:
+                return False
+        
+        if caractéristique == "cheveux":
+            if question == "cheveux noirs":
+                if valeurPerso == "Noir":
+                    return True
                 else:
-                    réponseSexe = "Femme"
-                    
-                if valeurPerso != réponseSexe:
-                    print(personnage.nom + " supprimé")
-                    listePersoSupprimés.append(personnage)
-                    
-            if caractéristique == "cheveux":
+                    return False
+            
+            if question == "cheveux bruns":
+                if valeurPerso == "Brun":
+                    return True
+                else:
+                    return False
+            
+            if question == "cheveux blonds":
+                if valeurPerso == "Blond":
+                    return True
+                else:
+                    return False
+        '''if caractéristique == "cheveux":
                 réponseCheveux = ""
                 supprimerPerso = False
                 if question == "cheveux noirs":
@@ -186,4 +197,20 @@ def robotAnswer(personnage, question):
                 else:
                     if valeurPerso != réponseCheveux:
                         print(personnage.nom + " supprimé")
-                        listePersoSupprimés.append(personnage)
+                        listePersoSupprimés.append(personnage)'''
+
+def final():
+    try:
+        while True:
+            try:
+                # Bouton Stop
+                if (BP.get_sensor(BP.PORT_4) == 1):
+                    return True
+                
+            except brickpi3.SensorError as error:
+                print(error)
+            
+            time.sleep(0.02)
+
+    except KeyboardInterrupt:
+        BP.reset_all()
