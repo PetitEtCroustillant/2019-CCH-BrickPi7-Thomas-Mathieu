@@ -58,9 +58,6 @@ def main():
     else:
         print("Faux")'''
     
-    
-    
-    
     '''for personnage in listePersos :
         print(personnage)
         print("\n")'''
