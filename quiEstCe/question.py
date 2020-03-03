@@ -2,13 +2,13 @@ import time
 import brickpi3
 import tts
 import motors
-import random
+from random import randrange
 
 BP = brickpi3.BrickPi3()
 
-BP.set_sensor_type(BP.PORT_4, BP.SENSOR_TYPE.TOUCH) # Bouton Stop
-BP.set_sensor_type(BP.PORT_2, BP.SENSOR_TYPE.TOUCH) # Bouton Faux
-BP.set_sensor_type(BP.PORT_1, BP.SENSOR_TYPE.TOUCH) # Bouton Vrai
+BP.set_sensor_type(BP.PORT_4, BP.SENSOR_TYPE.TOUCH) # Bouton du haut
+BP.set_sensor_type(BP.PORT_2, BP.SENSOR_TYPE.TOUCH) # Bouton Droit
+BP.set_sensor_type(BP.PORT_1, BP.SENSOR_TYPE.TOUCH) # Bouton Gauche
 
 # Génère une liste de questions
 def createList():
@@ -21,7 +21,7 @@ def createList():
     chauve = "chauve"
     cheveuxNoirs = "cheveux noirs"
     cheveuxBlonds = "cheveux blonds"
-    cheveuxBruns = "cheveux bruns"
+    cheveuxBruns = "cheveux brun"
     peauNoir = "peau noir"
     lunettes = "lunettes"
     couvreChef = "couvre-chef"
@@ -33,54 +33,57 @@ def createList():
     
     return liste_questions
 
-# Utilise la valeur de l'encoder pour sélectionner une question dans la liste
-def select(listeQuestion, listePersonnages):
+# Permet de sélectionner une question
+def selectOrGuess(listeQuestion, listePersonnages):
     try:
-        cycleCount = 0
-        oldValEncoder = -1
-        time.sleep(0.02)
         valDépartEncoder = int(BP.get_motor_encoder(BP.PORT_A))
-        while True:
-            try:
-                valEncoderRéelle = int(BP.get_motor_encoder(BP.PORT_A))
-                
-                while valDépartEncoder == valEncoderRéelle:
-                    valEncoderRéelle = int(BP.get_motor_encoder(BP.PORT_A))
-                    time.sleep(0.2)
-                    if (BP.get_sensor(BP.PORT_4) == 1):
-                        while (BP.get_sensor(BP.PORT_4) == 1):
-                            time.sleep(0.02)
-                        return final(listePersonnages)
-                       
-                    
-                # Valeur entre 1 et 14
-                valEncoder = int(BP.get_motor_encoder(BP.PORT_A) / (360 / len(listeQuestion)))
-                
-                # Prend une questions dans la liste
-                if valEncoder < 14.0:
-                    questionChoisie = listeQuestion[int(valEncoder)]
-                
-                time.sleep(0.5)
-                
-                if oldValEncoder == valEncoder:
-                    cycleCount += 1
-                else:
-                    cycleCount = 0
-                    oldValEncoder = valEncoder
-                
-                # Retourne la question au bout de 3 sec d'inactivité
-                if cycleCount == 2:
-                    tts.say("La question choisie est : " + questionChoisie)
-                    print("La question choisie est : " + questionChoisie)
-                    motors.zero(BP.PORT_A)
-                    return questionChoisie
-        
-            except IOError as error:
-                print(error)
+        valEncoderRéelle = int(BP.get_motor_encoder(BP.PORT_A))
+            
+        while valDépartEncoder == valEncoderRéelle:
+            valEncoderRéelle = int(BP.get_motor_encoder(BP.PORT_A))
+            time.sleep(0.2)
+            if (BP.get_sensor(BP.PORT_4) == 1):
+                while (BP.get_sensor(BP.PORT_4) == 1):
+                    time.sleep(0.02)
+                return proposerRéponse(listePersonnages)
+               
+        return selectQuestion(listeQuestion, listePersonnages)
         
     except KeyboardInterrupt:
         BP.reset_all()
 
+# Sélectionne une question selon sélecteur de questions.
+def selectQuestion(listeQuestions, listePersonnages):
+    cycleCount = 0
+    oldValEncoder = -1
+    time.sleep(0.02)
+    while True:
+        # Valeur entre 1 et 14
+        valEncoder = int(BP.get_motor_encoder(BP.PORT_A) / (360 / len(listeQuestions)))
+        
+        # Prend une questions dans la liste
+        if valEncoder < 14.0:
+            questionChoisie = listeQuestions[int(valEncoder)]
+        
+        time.sleep(0.5)
+        
+        if oldValEncoder == valEncoder:
+            cycleCount += 1
+        else:
+            cycleCount = 0
+            oldValEncoder = valEncoder
+            
+        if (BP.get_sensor(BP.PORT_4) == 1):
+            while (BP.get_sensor(BP.PORT_4) == 1):
+                time.sleep(0.02)
+            return proposerRéponse(listePersonnages)
+        
+        # Retourne la question au bout de 3 sec d'inactivité
+        if cycleCount == 2:
+            tts.say("La question choisie est : " + questionChoisie)
+            print("La question choisie est : " + questionChoisie)
+            motors.goToZero(BP.PORT_A)
+            return questionChoisie
 
 # Retourne true ou false selon le bouton appuyé
 def answer():
@@ -106,8 +109,17 @@ def answer():
     except KeyboardInterrupt:
         BP.reset_all()
 
+
+# Le robot pose des questions aléatoirement
+def robotSelectEasy(listeQuestions):
+    questionChoisie = listeQuestions[randrange(len(listeQuestions) - 1)]
+    
+    tts.sayQuestion(questionChoisie)
+    return questionChoisie
+    
+
 # Le robot pose des questions au joueur en fonction des réponses précédentes
-def robotSelect(listeRéponse):
+def robotSelectHard(listeRéponse):
     try:
         questionChoisie = "Non fonctionnel"
         if not listeRéponse:
@@ -156,7 +168,7 @@ def robotSelect(listeRéponse):
                     
             else:
                 # Femmes
-                questionChoisie = "cheveux bruns"
+                questionChoisie = "cheveux brun"
                 if 1 < len(listeRéponse):
                     if listeRéponse[1]:
                         questionChoisie = "couvre-chef"
@@ -174,26 +186,7 @@ def robotSelect(listeRéponse):
                             else:
                                 questionChoisie = "yeux brun"
         
-        switcher = {
-        "homme": "Est-ce que votre personnage est un homme ?",
-        "grande bouche": "Votre personnage a t'il une grande bouche ?",
-        "yeux brun": "Votre personnage a t'il des yeux bruns ?",
-        "moustache": "A t'il une moustache ?",
-        "barbe": "A t'il une barbe ?",
-        "chauve": "Est-ce que votre personnage est chauve ?",
-        "cheveux noirs": "Ses cheveux sont-ils noirs ?",
-        "cheveux blonds": "Ses cheveux sont-ils blonds ?",
-        "cheveux bruns": "Ses cheveux sont-ils bruns ?",
-        "peau noir": "Kanyé West ?",
-        "lunettes": "Votre personnage a-t'il des lunettes ?",
-        "couvre-chef": "Porte t'il un couvre-chef ?",
-        "gros nez": "A-t'il un gros nez ?"
-        }
-        
-        question = switcher.get(questionChoisie, "")
-        
-        tts.say(question)
-        print(question)
+        tts.sayQuestion(questionChoisie)
         return questionChoisie
         
     except KeyboardInterrupt:
@@ -212,7 +205,7 @@ def robotAnswer(personnage, question):
         "chauve": "chauve",
         "cheveux noirs": "cheveux",
         "cheveux blonds": "cheveux",
-        "cheveux bruns": "cheveux",
+        "cheveux brun": "cheveux",
         "peau noir": "peauNoire",
         "lunettes": "lunettes",
         "couvre-chef": "couvreChef",
@@ -241,7 +234,7 @@ def robotAnswer(personnage, question):
                 else:
                     return False
             
-            if question == "cheveux bruns":
+            if question == "cheveux brun":
                 if valeurPerso == "Brun":
                     return True
                 else:
@@ -253,10 +246,10 @@ def robotAnswer(personnage, question):
                 else:
                     return False
 
-def final(listePersonnages):
+def proposerRéponse(listePersonnages):
     try:
         indexEnCours = 0
-        tts.say(listePersonnages[indexEnCours].nom)
+        tts.say(tts.getPhonétiquePersonnage(listePersonnages[indexEnCours]))
         while True:
             try:
                 if (BP.get_sensor(BP.PORT_2) == 1):
@@ -277,7 +270,7 @@ def final(listePersonnages):
                     else:
                         indexEnCours -= 1
                     
-                    tts.say(listePersonnages[indexEnCours].nom)
+                    tts.say(tts.getPhonétiquePersonnage(listePersonnages[indexEnCours]))
                 
                 if (BP.get_sensor(BP.PORT_4) == 1):
                     while (BP.get_sensor(BP.PORT_4) == 1):

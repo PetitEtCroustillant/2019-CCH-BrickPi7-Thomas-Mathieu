@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from random import randrange
+from grove_rgb_lcd import *
 from enum import Enum
 
 class Sexe(Enum):
@@ -40,10 +41,10 @@ def createList():
     #personnages première ligne
     roger = Personnage("Roger", "Homme", "Brun", True, False, True, True, True, True, False, False, False, Coordonnées(1,1))
     joe = Personnage("Joe", "Homme", "Blond", False, True, False, False, False, False, False, False, False, Coordonnées(1,2))
-    hans = Personnage("Hansse", "Homme", "Blond", True, True, False, True, False, False, False, False, False, Coordonnées(1,3))
+    hans = Personnage("Hans", "Homme", "Blond", True, True, False, True, False, False, False, False, False, Coordonnées(1,3))
     daniel = Personnage("Daniel", "Homme", "Noir", False, False, True, False, False, False, False, True, False, Coordonnées(1,4))
     sarah = Personnage("Sarah", "Femme", "Blond", True, False, False, False, False, False, True, True, False, Coordonnées(1,5))
-    katrin = Personnage("Katrine", "Femme", "Brun", True, False, False, False, False, False, False, False, False, Coordonnées(1,6))
+    katrin = Personnage("Katrin", "Femme", "Brun", True, False, False, False, False, False, False, False, False, Coordonnées(1,6))
     théo = Personnage("Théo", "Homme", "Noir", True, True, False, True, False, False, False, False, True, Coordonnées(1,7))
     max = Personnage("Max", "Homme", "Noir", True, True, False, False, True, True, False, False, False, Coordonnées(1,8))
 
@@ -51,7 +52,7 @@ def createList():
     anne = Personnage("Anne", "Femme", "Autre", False, False, False, False, False, False, False, True, False, Coordonnées(2,1))
     charles = Personnage("Charles", "Homme", "Autre", True, False, True, True, False, False, False, True, True, Coordonnées(2,2))
     carmen = Personnage("Carmen", "Femme", "Brun", True, False, False, False, False, True, False, False, False, Coordonnées(2,3))
-    herman = Personnage("Hermanne", "Homme", "Autre", True, False, True, False, False, False, False, False, True, Coordonnées(2,4))
+    herman = Personnage("Herman", "Homme", "Autre", True, False, True, False, False, False, False, False, True, Coordonnées(2,4))
     sophie = Personnage("Sophie", "Femme", "Noir", True, True, False, False, False, True, False, True, True, Coordonnées(2,5))
     maria = Personnage("Maria", "Femme", "Brun", True, False, False, False, False, False, True, False, False, Coordonnées(2,6))
     eric = Personnage("Eric", "Homme", "Blond", True, True, False, False, False, False, True, False, False, Coordonnées(2,7))
@@ -75,7 +76,9 @@ def createList():
 # Tire un personnage au sort dans une liste passé en paramètre
 # Retourne le personnage tiré
 def getRandom(listePersonnages):
-    characterIndex = randrange(len(listePersonnages))
+    characterIndex = randrange(len(listePersonnages) - 1)
+    setText("Mon personnage\nest : " + listePersonnages[characterIndex].nom)
+    setRGB(0,64,128)
     return listePersonnages[characterIndex]
 
 
@@ -90,7 +93,7 @@ def eliminate(listePersonnage, question, réponse):
         "chauve": "chauve",
         "cheveux noirs": "cheveux",
         "cheveux blonds": "cheveux",
-        "cheveux bruns": "cheveux",
+        "cheveux brun": "cheveux",
         "peau noir": "peauNoire",
         "lunettes": "lunettes",
         "couvre-chef": "couvreChef",
@@ -128,7 +131,7 @@ def eliminate(listePersonnage, question, réponse):
                         réponseCheveux = "Blond"
                         if not réponse:
                             supprimerPerso = True
-                    elif question == "cheveux bruns":
+                    elif question == "cheveux brun":
                         réponseCheveux = "Brun"
                         if not réponse:
                             supprimerPerso = True
@@ -146,7 +149,6 @@ def eliminate(listePersonnage, question, réponse):
             print(personnage.nom + " supprimé")
             listePersonnage.remove(personnage)
     return listePersonnage
-    #return None
 
 def checkSelected(persoRobot, persoChoisiJoueur):
     return persoRobot == persoChoisiJoueur
