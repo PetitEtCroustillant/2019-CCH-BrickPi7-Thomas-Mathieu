@@ -34,13 +34,25 @@ def createList():
     return liste_questions
 
 # Utilise la valeur de l'encoder pour sélectionner une question dans la liste
-def select(listeQuestion):
+def select(listeQuestion, listePersonnages):
     try:
         cycleCount = 0
         oldValEncoder = -1
-        motors.zero(BP.PORT_A)
+        time.sleep(0.02)
+        valDépartEncoder = int(BP.get_motor_encoder(BP.PORT_A))
         while True:
             try:
+                valEncoderRéelle = int(BP.get_motor_encoder(BP.PORT_A))
+                
+                while valDépartEncoder == valEncoderRéelle:
+                    valEncoderRéelle = int(BP.get_motor_encoder(BP.PORT_A))
+                    time.sleep(0.2)
+                    if (BP.get_sensor(BP.PORT_4) == 1):
+                        while (BP.get_sensor(BP.PORT_4) == 1):
+                            time.sleep(0.02)
+                        return final(listePersonnages)
+                       
+                    
                 # Valeur entre 1 et 14
                 valEncoder = int(BP.get_motor_encoder(BP.PORT_A) / (360 / len(listeQuestion)))
                 
@@ -57,9 +69,9 @@ def select(listeQuestion):
                     oldValEncoder = valEncoder
                 
                 # Retourne la question au bout de 3 sec d'inactivité
-                if cycleCount == 6:
-                    tts.say("La question choisie est: " + questionChoisie)
-                    #print("La question choisie est: " + questionChoisie)
+                if cycleCount == 2:
+                    tts.say("La question choisie est : " + questionChoisie)
+                    print("La question choisie est : " + questionChoisie)
                     motors.zero(BP.PORT_A)
                     return questionChoisie
         
@@ -77,9 +89,13 @@ def answer():
             try:
                 # Bouton Faux
                 if (BP.get_sensor(BP.PORT_2) == 1):
+                    while (BP.get_sensor(BP.PORT_2) == 1):
+                        time.sleep(0.02)
                     return False
                 # Bouton Vrai
                 elif (BP.get_sensor(BP.PORT_1) == 1):
+                    while (BP.get_sensor(BP.PORT_1) == 1):
+                        time.sleep(0.02)
                     return True
                 
             except brickpi3.SensorError as error:
@@ -90,30 +106,94 @@ def answer():
     except KeyboardInterrupt:
         BP.reset_all()
 
-#
-def robotSelect(passe, réponse = True):
+# Le robot pose des questions au joueur en fonction des réponses précédentes
+def robotSelect(listeRéponse):
     try:
         questionChoisie = "Non fonctionnel"
-        if réponse == None:
+        if not listeRéponse:
             questionChoisie = "homme"
-        elif passe >= 2:
-            if réponse:
+        else:
+            if listeRéponse[0]:
                 # Hommes
                 questionChoisie = "grande bouche"
-                if passe >= 3:
-                    if réponse:
+                if 1 < len(listeRéponse):
+                    if listeRéponse[1]:
                         questionChoisie = "gros nez"
+                        if 2 < len(listeRéponse):
+                            if listeRéponse[2]:
+                                questionChoisie = "cheveux noirs"
+                                if 3 < len(listeRéponse):
+                                    if listeRéponse[3]:
+                                        questionChoisie = "couvre-chef"
+                            else:
+                                questionChoisie = "moustache"
+                                if 2 < len(listeRéponse):
+                                    if not listeRéponse[2]:
+                                        questionChoisie = "yeux brun"
+                                        if 3 < len(listeRéponse):
+                                            if listeRéponse[3]:
+                                                questionChoisie = "couvre-chef"
                     else:
                         questionChoisie = "moustache"
+                        if 2 < len(listeRéponse):
+                            if listeRéponse[2]:
+                                questionChoisie = "chauve"
+                                if 3 < len(listeRéponse):
+                                    if listeRéponse[3]:
+                                        questionChoisie = "lunettes"
+                                    else:
+                                        questionChoisie = "yeux brun"
+                            else:
+                                questionChoisie = "chauve"
+                                if 3 < len(listeRéponse):
+                                    if listeRéponse[3]:
+                                        questionChoisie = "yeux brun"
+                                        if 4 < len(listeRéponse):
+                                            if not listeRéponse[4]:
+                                                questionChoisie = "barbe"
+                                    else:
+                                        questionChoisie = "lunettes"
+                    
             else:
                 # Femmes
                 questionChoisie = "cheveux bruns"
-        # 5 passes max pour les femmes
-        # 6 passes maxpour les hommes
+                if 1 < len(listeRéponse):
+                    if listeRéponse[1]:
+                        questionChoisie = "couvre-chef"
+                        if 2 < len(listeRéponse):
+                            if not listeRéponse[2]:
+                                questionChoisie = "peau noir"
+                    else:
+                        questionChoisie = "lunettes"
+                        if 2 < len(listeRéponse):
+                            if listeRéponse[2]:
+                                questionChoisie = "grande bouche"
+                                if 3 < len(listeRéponse):
+                                    if not listeRéponse[3]:
+                                        questionChoisie = "couvre-chef"
+                            else:
+                                questionChoisie = "yeux brun"
         
+        switcher = {
+        "homme": "Est-ce que votre personnage est un homme ?",
+        "grande bouche": "Votre personnage a t'il une grande bouche ?",
+        "yeux brun": "Votre personnage a t'il des yeux bruns ?",
+        "moustache": "A t'il une moustache ?",
+        "barbe": "A t'il une barbe ?",
+        "chauve": "Est-ce que votre personnage est chauve ?",
+        "cheveux noirs": "Ses cheveux sont-ils noirs ?",
+        "cheveux blonds": "Ses cheveux sont-ils blonds ?",
+        "cheveux bruns": "Ses cheveux sont-ils bruns ?",
+        "peau noir": "Kanyé West ?",
+        "lunettes": "Votre personnage a-t'il des lunettes ?",
+        "couvre-chef": "Porte t'il un couvre-chef ?",
+        "gros nez": "A-t'il un gros nez ?"
+        }
         
-        #tts.say("La question choisie est: " + questionChoisie)
-        print("Je choisi la question : " + questionChoisie)
+        question = switcher.get(questionChoisie, "")
+        
+        tts.say(question)
+        print(question)
         return questionChoisie
         
     except KeyboardInterrupt:
@@ -149,7 +229,7 @@ def robotAnswer(personnage, question):
                 return False
     
         if caractéristique == "sexe":
-            if valeurPerso == "homme":
+            if valeurPerso == "Homme":
                 return True
             else:
                 return False
@@ -172,40 +252,37 @@ def robotAnswer(personnage, question):
                     return True
                 else:
                     return False
-        '''if caractéristique == "cheveux":
-                réponseCheveux = ""
-                supprimerPerso = False
-                if question == "cheveux noirs":
-                    réponseCheveux = "Noir"
-                    if not réponse:
-                        supprimerPerso = True
-                elif question == "cheveux blonds":
-                    réponseCheveux = "Blond"
-                    if not réponse:
-                        supprimerPerso = True
-                elif question == "cheveux bruns":
-                    réponseCheveux = "Brun"
-                    if not réponse:
-                        supprimerPerso = True
-                else:
-                    réponseCheveux = "Autre"
-                
-                if supprimerPerso:
-                    if valeurPerso == réponseCheveux:
-                        print(personnage.nom + " supprimé")
-                        listePersoSupprimés.append(personnage)
-                else:
-                    if valeurPerso != réponseCheveux:
-                        print(personnage.nom + " supprimé")
-                        listePersoSupprimés.append(personnage)'''
 
-def final():
+def final(listePersonnages):
     try:
+        indexEnCours = 0
+        tts.say(listePersonnages[indexEnCours].nom)
         while True:
             try:
-                # Bouton Stop
+                if (BP.get_sensor(BP.PORT_2) == 1):
+                    while (BP.get_sensor(BP.PORT_2) == 1):
+                        time.sleep(0.02)
+                    if indexEnCours == len(listePersonnages) - 1:
+                        indexEnCours = 0
+                    else:
+                        indexEnCours += 1
+                    
+                    tts.say(listePersonnages[indexEnCours].nom)
+                    
+                elif (BP.get_sensor(BP.PORT_1) == 1):
+                    while (BP.get_sensor(BP.PORT_1) == 1):
+                        time.sleep(0.02)
+                    if indexEnCours == 0:
+                        indexEnCours = len(listePersonnages) - 1
+                    else:
+                        indexEnCours -= 1
+                    
+                    tts.say(listePersonnages[indexEnCours].nom)
+                
                 if (BP.get_sensor(BP.PORT_4) == 1):
-                    return True
+                    while (BP.get_sensor(BP.PORT_4) == 1):
+                        time.sleep(0.02)
+                    return listePersonnages[indexEnCours]
                 
             except brickpi3.SensorError as error:
                 print(error)

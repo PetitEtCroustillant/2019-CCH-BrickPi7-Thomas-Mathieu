@@ -6,60 +6,73 @@ import motors
 import tts
 
 import brickpi3
+from grove_rgb_lcd import *
 import time
-import os
 BP = brickpi3.BrickPi3()
 
 def main():
     '''motors.stop(BP.PORT_B)
     motors.resetEncoder(BP.PORT_B)
-    chariot.move(8)'''
+    motors.resetEncoder(BP.PORT_A)'''
+    motors.zero(BP.PORT_A)
     
-    listePersos = character.createList()
-    persoAléatoire = character.getRandom(listePersos)
-    print(persoAléatoire)
-    #motors.resetEncoder(BP.PORT_A)
+    # Création des deux listes de personnages
+    listePersosRobot = character.createList()
+    listePersosJoueur = character.createList()
     
-    '''for personnage in listePersos :
-      print(personnage)
-      print("\n")'''
-    
+    # Création de la liste de questions
     listeQuestion = question.createList()
-    questionChoisie = question.select(listeQuestion)
-    print(questionChoisie)
-    #questionChoisie = question.robotSelect(1)
-    #réponse = question.answer()
-    #if réponse:
-    #    print("Vrai")
-    #else:
-    #    print("Faux")
-        
-    #questionChoisie = question.robotSelect(2, réponse)
+    
+    # Le robot choisi un personnage
+    persoAléatoire = character.getRandom(listePersosRobot)
+    setText("Mon personnage\nest : " + persoAléatoire.nom)
+    setRGB(0,64,128)
+    print(persoAléatoire)
     
     # Le robot pose des questions, on y répond jusqu'à ce qu'il ne reste un personnage.
-    passe = 1
-    réponse = None
+    listeRéponse: List[bool] = []
     while True:
-        questionChoisie = question.robotSelect(passe, réponse) # le robot choisi une question
-        réponse = question.answer() # le joueur y répond
-        listePersos = character.eliminate(listePersos, questionChoisie, réponse) # les personnages qui ne correspondent pas sont supprimés
-        passe += 1
-        if len(listePersos) == 1:
-            return False
-        #if question.final():
-            #return False
+        # Tour du joueur
+        # On pose une question au robot, il répond selon les caractéristiques du personnage tiré aléatoirement.
+        tts.say("C'est à votre tour !")
+        print("\nTour joueur\n")
+        time.sleep(0.2)
+        questionChoisieJoueur = question.select(listeQuestion, listePersosJoueur)
+        if type(questionChoisieJoueur) is character.Personnage:
+            if character.checkSelected(persoAléatoire, questionChoisieJoueur):
+                print("Vous avez gagné !")
+                tts.say("Vous avez gagné !")
+                break
+            else:
+                listePersosJoueur.remove(questionChoisieJoueur)
+                print("Désolé " + questionChoisieJoueur.nom + " n'est pas mon personnage")
+                tts.say("Désolé " + questionChoisieJoueur.nom + " n'est pas mon personnage")
+        else:
+            réponseRobot = question.robotAnswer(persoAléatoire, questionChoisieJoueur)
+            if réponseRobot:
+                print("La réponse a votre question est : Vrai")
+                tts.say("La réponse a votre question est : Vrai")
+            else:
+                print("La réponse a votre question est : Faux")
+                tts.say("La réponse a votre question est : Faux")
+            listePersosJoueur = character.eliminate(listePersosJoueur, questionChoisieJoueur, réponseRobot) 
+        if len(listePersosJoueur) == 1:
+            print("Mon personnage est : " + listePersosJoueur[0].nom + ", vous avez gagné !")
+            tts.say("Mon personnage est : " + listePersosJoueur[0].nom + ", vous avez gagné !")
+            break
+        
+        time.sleep(len(listePersosJoueur) / 6)
+        
+        # Tour du robot
+        tts.say("C'est à mon tour !")
+        print("\nTour Robot\n")
+        time.sleep(0.2)
+        questionChoisieRobot = question.robotSelect(listeRéponse) # le robot choisi une question
+        listeRéponse.append(question.answer()) # le joueur y répond
+        listePersosRobot = character.eliminate(listePersosRobot, questionChoisieRobot, listeRéponse[-1]) # les personnages qui ne correspondent pas sont supprimés
+        if len(listePersosRobot) == 1:
+            print("Votre personnage est : " + listePersosRobot[0].nom + ", j'ai gagné !")
+            tts.say("Votre personnage est : " + listePersosRobot[0].nom + ", j'ai gagné !")
+            break
     
-    # On pose une question au robot, il répond selon les caractéristiques
-    # du personnage tiré aléatoirement.
-    '''questionChoisie = question.select(listeQuestion)
-    réponseRobot = question.robotAnswer(persoAléatoire, questionChoisie)
-    if réponseRobot:
-        print("Vrai")
-    else:
-        print("Faux")'''
-    
-    '''for personnage in listePersos :
-        print(personnage)
-        print("\n")'''
-
 main()
