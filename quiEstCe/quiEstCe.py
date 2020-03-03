@@ -154,18 +154,9 @@ def choixFinPartie():
         BP.reset_all()
 
 def débutJeu():
+    tts.say("bip bloup je suis le robot")
     tts.say("Bienvenu dans Qui est-ce ? choisissez votre mode de jeu.")
     modeJeu = choixModeJeu()
     return modeJeu
-
-def test():
-    '''listeQuestion = question.createList()
-    for questions in listeQuestion:
-        tts.sayQuestion(questions)
-        time.sleep(1)'''
-    #tts.say("bip bloup je suis le robot")
     
-while True:
-    tts.say("nigga nigga nigga nigga nigga nigga nigga nigga nigga nigga nigga nigga nigga nigga nigga nigga ")
-#main()
-#test()
+main()
