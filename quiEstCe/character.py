@@ -1,15 +1,17 @@
 from dataclasses import dataclass
+from random import randrange
+from grove_rgb_lcd import *
 from enum import Enum
 
 class Sexe(Enum):
-     Homme = 1
-     Femme = 2
+    Homme = 1
+    Femme = 2
      
 class Cheveux(Enum):
-     Brun = 1
-     Noir = 2
-     Blond = 3
-     Autre = 4
+    Brun = 1
+    Noir = 2
+    Blond = 3
+    Autre = 4
 
 @dataclass
 class Coordonnées:
@@ -32,7 +34,10 @@ class Personnage:
     grosNez: bool
     coordonnées: Coordonnées
 
+# Crée une liste de personnages
 def createList():
+    # Nom, Sexe, Cheveux, Yeux bruns, Grande bouche, chauve, moustache, barbe, peau noir, couvre chef, lunettes, gros nez
+
     #personnages première ligne
     roger = Personnage("Roger", "Homme", "Brun", True, False, True, True, True, True, False, False, False, Coordonnées(1,1))
     joe = Personnage("Joe", "Homme", "Blond", False, True, False, False, False, False, False, False, False, Coordonnées(1,2))
@@ -67,3 +72,83 @@ def createList():
                         stephen, lucas, bernard, isabelle, victor, frank, paul]
     return liste_personnage
 
+
+# Tire un personnage au sort dans une liste passé en paramètre
+# Retourne le personnage tiré
+def getRandom(listePersonnages):
+    characterIndex = randrange(len(listePersonnages) - 1)
+    setText("Mon personnage\nest : " + listePersonnages[characterIndex].nom)
+    setRGB(0,64,128)
+    return listePersonnages[characterIndex]
+
+
+# Supprime des personnages de la liste
+def eliminate(listePersonnage, question, réponse):
+    switcher = {
+        "homme": "sexe",
+        "grande bouche": "grandeBouche",
+        "yeux brun": "yeuxBruns",
+        "moustache": "moustache",
+        "barbe": "barbe",
+        "chauve": "chauve",
+        "cheveux noirs": "cheveux",
+        "cheveux blonds": "cheveux",
+        "cheveux brun": "cheveux",
+        "peau noir": "peauNoire",
+        "lunettes": "lunettes",
+        "couvre-chef": "couvreChef",
+        "gros nez": "grosNez"
+    }
+    
+    caractéristique = switcher.get(question, "")
+    listePersoSupprimés = []
+    if not caractéristique == "":
+        for personnage in listePersonnage:
+            valeurPerso = getattr(personnage, caractéristique)
+            
+            if type(valeurPerso) == bool:
+                if valeurPerso != réponse:
+                    listePersoSupprimés.append(personnage)
+            if type(valeurPerso) == str:
+                if caractéristique == "sexe":
+                    réponseSexe = ""
+                    if réponse:
+                        réponseSexe = "Homme"
+                    else:
+                        réponseSexe = "Femme"
+                        
+                    if valeurPerso != réponseSexe:
+                        listePersoSupprimés.append(personnage)
+                        
+                if caractéristique == "cheveux":
+                    réponseCheveux = ""
+                    supprimerPerso = False
+                    if question == "cheveux noirs":
+                        réponseCheveux = "Noir"
+                        if not réponse:
+                            supprimerPerso = True
+                    elif question == "cheveux blonds":
+                        réponseCheveux = "Blond"
+                        if not réponse:
+                            supprimerPerso = True
+                    elif question == "cheveux brun":
+                        réponseCheveux = "Brun"
+                        if not réponse:
+                            supprimerPerso = True
+                    else:
+                        réponseCheveux = "Autre"
+                    
+                    if supprimerPerso:
+                        if valeurPerso == réponseCheveux:
+                            listePersoSupprimés.append(personnage)
+                    else:
+                        if valeurPerso != réponseCheveux:
+                            listePersoSupprimés.append(personnage)
+                
+        for personnage in listePersoSupprimés:
+            print(personnage.nom + " supprimé")
+            listePersonnage.remove(personnage)
+    return listePersonnage
+
+def checkSelected(persoRobot, persoChoisiJoueur):
+    return persoRobot == persoChoisiJoueur
