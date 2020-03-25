@@ -83,7 +83,7 @@ def getRandom(listePersonnages):
 
 
 # Supprime des personnages de la liste
-def eliminate(listePersonnage, question, réponse):
+def eliminate(listePersonnage, question, réponse, joueur = "humain"):
     switcher = {
         "homme": "sexe",
         "grande bouche": "grandeBouche",
@@ -144,11 +144,36 @@ def eliminate(listePersonnage, question, réponse):
                     else:
                         if valeurPerso != réponseCheveux:
                             listePersoSupprimés.append(personnage)
-                
+          
+        if joueur == "robot":
+            listePersoSupprimés = triListePerso(listePersoSupprimés)
+                    
         for personnage in listePersoSupprimés:
             print(personnage.nom + " supprimé")
             listePersonnage.remove(personnage)
     return listePersonnage
+
+#Tri une liste de personnage dans l'ordre inverse des colognes et des lignes
+def triListePerso(listePersoSupprimés):
+    permutation = True
+    while permutation:
+        permutation = False
+        index = 0 
+        for x in range(len(listePersoSupprimés) - 1):
+            if listePersoSupprimés[index].coordonnées.y < listePersoSupprimés[index + 1].coordonnées.y:
+                permutation = True
+                temp = listePersoSupprimés[index]
+                listePersoSupprimés[index] = listePersoSupprimés[index + 1]
+                listePersoSupprimés[index + 1] = temp
+            elif listePersoSupprimés[index].coordonnées.y == listePersoSupprimés[index + 1].coordonnées.y:
+                if listePersoSupprimés[index].coordonnées.x < listePersoSupprimés[index + 1].coordonnées.x:
+                    permutation = True
+                    temp = listePersoSupprimés[index]
+                    listePersoSupprimés[index] = listePersoSupprimés[index + 1]
+                    listePersoSupprimés[index + 1] = temp
+            index += 1
+    
+    return listePersoSupprimés
 
 def checkSelected(persoRobot, persoChoisiJoueur):
     return persoRobot == persoChoisiJoueur
