@@ -105,6 +105,7 @@ def main():
         else:
             main()
     
+# Permet au joueur de choisir une difficulté
 def choixModeJeu():
     try:
         while True:
@@ -130,6 +131,8 @@ def choixModeJeu():
     except KeyboardInterrupt:
         BP.reset_all()
 
+# Permet au joueur de recommencer une partie avec les paramètres actuels
+# ou de retourner au choix des paramètres
 def choixFinPartie():
     try:
         while True:
@@ -153,6 +156,7 @@ def choixFinPartie():
     except KeyboardInterrupt:
         BP.reset_all()
 
+# Commence le jeu et permet de choisir le mode de jeu
 def débutJeu():
     tts.say("Bienvenu dans Qui est-ce ? choisissez votre mode de jeu.")
     modeJeu = choixModeJeu()
