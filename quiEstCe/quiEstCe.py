@@ -154,7 +154,6 @@ def choixFinPartie():
         BP.reset_all()
 
 def débutJeu():
-    tts.say("bip bloup je suis le robot")
     tts.say("Bienvenu dans Qui est-ce ? choisissez votre mode de jeu.")
     modeJeu = choixModeJeu()
     return modeJeu
