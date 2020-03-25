@@ -246,6 +246,9 @@ def robotAnswer(personnage, question):
                 else:
                     return False
 
+# Permet au joueur de sélectionner le personnage du robot,
+# le robot dit le nom des personnages (bouton gauche pour le précédent,
+# bouton droite pour le suivant)
 def proposerRéponse(listePersonnages):
     try:
         indexEnCours = 0
