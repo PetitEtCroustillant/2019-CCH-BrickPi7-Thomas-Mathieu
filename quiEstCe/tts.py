@@ -1,12 +1,14 @@
 #from espeak import espeak
 import os
 
+# Dit une chaine de caractères à haute voix
 def say(text):
     fréquence = 100
     débitParole = 140
     
     os.system ('espeak -a ' + str(fréquence) + ' -v mb-fr1 -s ' + str(débitParole) + ' "' + text + '"')
 
+# Pose des questions au joueur à haute voix
 def sayQuestion(question):
     switcher = {
         "homme": "Est-ce que votre personnage est un homme ?",
@@ -29,6 +31,7 @@ def sayQuestion(question):
     say(prononciationQuestion)
     print(prononciationQuestion)
 
+# Retourne un nom prononçable par le robot
 def getPhonétiquePersonnage(personnage):
     switcher = {
         "Roger": "Roger",
